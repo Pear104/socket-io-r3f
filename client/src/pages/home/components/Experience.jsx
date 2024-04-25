@@ -15,41 +15,38 @@ const animationSet = {
   jump: "CharacterArmature|Jump",
   jumpIdle: "CharacterArmature|Jump_Idle",
   jumpLand: "CharacterArmature|Jump_Land",
-  fall: "CharacterArmature|Duck", // This is for falling from high sky
+  fall: "CharacterArmature|Duck",
   action1: "CharacterArmature|Wave",
   action2: "CharacterArmature|Death",
   action3: "CharacterArmature|HitReact",
   action4: "CharacterArmature|Punch",
 };
-// const characterURL = "./models/xbot/xbot.gltf";
+
 const characterURL = "./models/demon/Demon.glb";
 const ControlledCharacter = () => {
   const charRef = useRef();
   window.onkeydown = (e) => {
-    console.log(charRef.current);
-    console.log(charRef.current.position);
+    console.log(charRef.current.translation());
+    const pos = charRef.current.translation();
+    socket.emit("move", [pos.x, pos.y, pos.z]);
   };
   return (
-    <group ref={charRef}>
-      <Ecctrl
-        // debug
-        animated
-        floatHeight={0}
-        followLight
-        springK={2}
-        dampingC={0.2}
-        autoBalanceSpringK={1.2}
-        autoBalanceDampingC={0.04}
-        autoBalanceSpringOnY={0.7}
-      >
-        <EcctrlAnimation
-          characterURL={characterURL}
-          animationSet={animationSet}
-        >
-          <Demon position={[0, -0.65, 0]} />
-        </EcctrlAnimation>
-      </Ecctrl>
-    </group>
+    <Ecctrl
+      // debug
+      animated
+      floatHeight={0}
+      followLight
+      springK={2}
+      dampingC={0.2}
+      autoBalanceSpringK={1.2}
+      autoBalanceDampingC={0.04}
+      autoBalanceSpringOnY={0.7}
+      ref={charRef}
+    >
+      <EcctrlAnimation characterURL={characterURL} animationSet={animationSet}>
+        <Demon position={[0, -0.65, 0]} />
+      </EcctrlAnimation>
+    </Ecctrl>
   );
 };
 
@@ -58,10 +55,9 @@ export const Experience = () => {
 
   return (
     <>
-      <OrbitControls />
       <ambientLight intensity={5} />
-      <RigidBody type="fixed">
-        <Box args={[10, 1, 10]} position={[0, 0, 0]}>
+      <RigidBody type="fixed" position={[0, -1, 0]}>
+        <Box args={[50, 1, 50]}>
           <meshStandardMaterial color={"green"} />
         </Box>
       </RigidBody>
@@ -69,7 +65,12 @@ export const Experience = () => {
       {characters
         .filter((char) => char.id != socket.id)
         .map((char) => (
-          <Demon key={char.id} position={[0, 0.52, 0]} />
+          // <RigidBody key={char.id} type="dynamic">
+          // </RigidBody>
+          <Demon
+            key={char.id}
+            position={[char.position[0], 0, char.position[2]]}
+          />
         ))}
     </>
   );

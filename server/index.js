@@ -25,11 +25,16 @@ io.on("connection", (socket) => {
     id: socket.id,
     position: [0, 0.52, 0],
   });
-  console.log(characters);
   socket.emit("hello");
   io.emit("characters", characters);
-  // socket.on("hello", (msg) => {
-  // });
+
+  socket.on("move", (pos) => {
+    let a = characters[characters.findIndex((char) => char.id === socket.id)];
+    console.log((a.position = [pos[0], pos[1], pos[2]]));
+    io.emit("characters", characters);
+    // console.log(characters);
+  });
+
   socket.on("disconnect", () => {
     console.log("user disconnected");
     characters.splice(
